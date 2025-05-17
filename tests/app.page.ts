@@ -29,6 +29,11 @@ export class AppPage {
     return grille.getByRole("button").all();
   }
 
+  async boutonGrille(numeroBouton: number) {
+    const listeBoutonGrille = await this.listeBoutonGrille();
+    return listeBoutonGrille[numeroBouton - 1];
+  }
+
   async selectionnerDifficulte(difficulte: string) {
     return (await this.selectionDifficulte()).selectOption(difficulte);
   }

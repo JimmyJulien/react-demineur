@@ -1,8 +1,12 @@
 import { useState, type ChangeEvent } from "react";
 import "./App.css";
 
+type ValeurCellule = "💣" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
+
 interface Cellule {
-  libelle: string;
+  estBalisee: boolean;
+  estDecouverte: boolean;
+  valeur: ValeurCellule;
 }
 
 type Difficulte = "Débutant" | "Intermédiaire" | "Expert";
@@ -63,7 +67,11 @@ export function App() {
     }
 
     for (let i = 0; i < largeurGrille * hauteurGrille; i++) {
-      listeBoutonGrille.push({ libelle: "" });
+      listeBoutonGrille.push({
+        estBalisee: false,
+        estDecouverte: false,
+        valeur: "💣",
+      });
     }
 
     setGrille({
@@ -73,6 +81,48 @@ export function App() {
     });
 
     setEstGrilleAffichee(true);
+  }
+
+  function decouvrirCellule(indexCellule: number) {
+    if (grille) {
+      const nouvelleListeCellule: Cellule[] = [];
+
+      for (let i = 0; i < grille.listeCellule.length; i++) {
+        const cellule = grille.listeCellule[i];
+
+        if (i === indexCellule) {
+          cellule.estDecouverte = true;
+        }
+
+        nouvelleListeCellule.push(cellule);
+      }
+
+      setGrille({
+        ...grille,
+        listeCellule: nouvelleListeCellule,
+      });
+    }
+  }
+
+  function baliserCellule(indexCellule: number) {
+    if (grille) {
+      const nouvelleListeCellule: Cellule[] = [];
+
+      for (let i = 0; i < grille.listeCellule.length; i++) {
+        const cellule = grille.listeCellule[i];
+
+        if (i === indexCellule) {
+          cellule.estBalisee = true;
+        }
+
+        nouvelleListeCellule.push(cellule);
+      }
+
+      setGrille({
+        ...grille,
+        listeCellule: nouvelleListeCellule,
+      });
+    }
   }
 
   return (
@@ -102,8 +152,18 @@ export function App() {
           }}
           data-testid="grille"
         >
-          {grille?.listeCellule.map((bouton, i) => (
-            <button key={i}>{bouton.libelle}</button>
+          {grille?.listeCellule.map((cellule, i) => (
+            <button
+              key={i}
+              onClick={() => decouvrirCellule(i)}
+              onContextMenu={() => baliserCellule(i)}
+            >
+              {cellule.estBalisee
+                ? "🚩"
+                : cellule.estDecouverte
+                  ? cellule.valeur
+                  : ""}
+            </button>
           ))}
         </div>
       )}

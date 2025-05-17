@@ -85,9 +85,37 @@ test(
   },
 );
 
-// Doit afficher la valeur de la case quand clic gauche sur cette case
+test("Doit afficher la valeur de la case quand clic gauche sur cette case", async ({
+  page,
+}) => {
+  const appPage = new AppPage(page);
 
-// Doit poser un drapeau quand clic droit sur cette case
+  await appPage.jouer("Débutant");
+
+  const premierBouton = await appPage.boutonGrille(1);
+
+  await expect(premierBouton).toHaveText("");
+
+  await premierBouton.click();
+
+  await expect(premierBouton).toHaveText("💣");
+});
+
+test("Doit afficher un drapeau dans le bouton quand clic droit sur celui-ci", async ({
+  page,
+}) => {
+  const appPage = new AppPage(page);
+
+  await appPage.jouer("Débutant");
+
+  const premierBouton = await appPage.boutonGrille(1);
+
+  await expect(premierBouton).toHaveText("");
+
+  await premierBouton.click({ button: "right" });
+
+  await expect(premierBouton).toHaveText("🚩");
+});
 
 // Doit afficher "Gagné" quand toutes les cases sans mine ont été retournées
 
@@ -96,3 +124,5 @@ test(
 // Doit débloquer le menu déroulant et le bouton "Jouer" quand la partie est gagnée
 
 // Doit débloquer le menu déroulant et le bouton "Jouer" quand la partie est perdue
+
+// Doit réinitialiser la grille quand une nouvelle partie est lancée
