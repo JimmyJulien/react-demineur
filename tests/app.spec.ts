@@ -1,17 +1,89 @@
 import { expect, test } from "@playwright/test";
+import { AppPage } from "./app.page";
 
-test("a titre 'React demineur'", async ({ page }) => {
-  await page.goto("http://localhost:5173");
-  await expect(page).toHaveTitle(/React demineur/);
+test("Doit afficher un menu déroulant avec les options Débutant, Intermédiaire et Expert", async ({
+  page,
+}) => {
+  const appPage = new AppPage(page);
+
+  await appPage.goto();
+
+  const listeOptionDifficulte = await appPage.listeOptionDifficulte();
+
+  await expect(listeOptionDifficulte.length).toBe(3);
+  await expect(listeOptionDifficulte[0]).toHaveText("Débutant");
+  await expect(listeOptionDifficulte[1]).toHaveText("Intermédiaire");
+  await expect(listeOptionDifficulte[2]).toHaveText("Expert");
 });
 
-// Doit afficher un menu déroulant avec les options Débutant, Intermédiaire et Expert
+test("Doit afficher un bouton 'Jouer'", async ({ page }) => {
+  const appPage = new AppPage(page);
 
-// Doit afficher un bouton "Jouer"
+  await appPage.goto();
 
-// Doit bloquer le menu déroulant et le bouton "Jouer" quand le bouton "Jouer" a été cliqué
+  const boutonJouer = await appPage.boutonJouer();
 
-// Doit afficher une grille avec le nombre de cases sélectionné quand clic sur bouton "Jouer"
+  await expect(boutonJouer).toBeVisible();
+});
+
+test("Doit bloquer le menu déroulant et le bouton 'Jouer' quand il a été cliqué", async ({
+  page,
+}) => {
+  const appPage = new AppPage(page);
+
+  await appPage.goto();
+
+  await appPage.cliquerBoutonJouer();
+
+  const boutonJouer = await appPage.boutonJouer();
+
+  const selectionDifficulte = await appPage.selectionDifficulte();
+
+  await expect(boutonJouer).toBeDisabled();
+  await expect(selectionDifficulte).toBeDisabled();
+});
+
+test(
+  "Doit afficher une grille 8x8 " +
+    "quand la difficulté 'Débutant' est sélectionnée et le bouton 'Jouer' est cliqué",
+  async ({ page }) => {
+    const appPage = new AppPage(page);
+
+    await appPage.jouer("Débutant");
+
+    const listeBoutonGrille = await appPage.listeBoutonGrille();
+
+    await expect(listeBoutonGrille.length).toBe(8 * 8);
+  },
+);
+
+test(
+  "Doit afficher une grille 16x16 " +
+    "quand la difficulté 'Intermédiaire' est sélectionnée et le bouton 'Jouer' est cliqué",
+  async ({ page }) => {
+    const appPage = new AppPage(page);
+
+    await appPage.jouer("Intermédiaire");
+
+    const listeBoutonGrille = await appPage.listeBoutonGrille();
+
+    await expect(listeBoutonGrille.length).toBe(16 * 16);
+  },
+);
+
+test(
+  "Doit afficher une grille 30x16 " +
+    "quand la difficulté 'Expert' est sélectionnée et le bouton 'Jouer' est cliqué",
+  async ({ page }) => {
+    const appPage = new AppPage(page);
+
+    await appPage.jouer("Expert");
+
+    const listeBoutonGrille = await appPage.listeBoutonGrille();
+
+    await expect(listeBoutonGrille.length).toBe(30 * 16);
+  },
+);
 
 // Doit afficher la valeur de la case quand clic gauche sur cette case
 
