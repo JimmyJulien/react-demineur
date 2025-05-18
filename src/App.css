@@ -1,42 +1,111 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+* {
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
+  height: calc(100vh - 1rem);
+}
+
+.main-container {
+  background: lightgray;
+  display: grid;
+  gap: 1rem;
+  border: 2px solid black;
+  padding: 1rem;
+}
+
+.selection-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selection {
+  font-size: 1.5rem;
+  font-weight: bold;
   text-align: center;
+  border: 2px solid;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.conteneur-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  place-items: center;
+  font-size: 2.5rem;
+  font-weight: bold;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.icone-action {
+  font-size: 1.5rem;
 }
 
-.card {
-  padding: 2em;
+.bouton-action {
+  font-size: 2.5rem;
 }
 
-.read-the-docs {
-  color: #888;
+.conteneur-zone {
+  display: grid;
+  padding: 1rem;
+}
+
+.emplacement {
+  color: black;
+  font-size: 1.2rem;
+  font-weight: 800;
+  height: 38px;
+  width: 38px;
+  background: lightgray;
+  color: black;
+}
+
+.emplacement.erreur {
+  background: red;
+}
+
+.emplacement[data-valeur="0"] {
+  color: transparent;
+}
+
+.emplacement[data-valeur="1"] {
+  color: blue;
+}
+
+.emplacement[data-valeur="2"] {
+  color: green;
+}
+
+.emplacement[data-valeur="3"] {
+  color: red;
+}
+
+.emplacement[data-valeur="4"] {
+  color: darkblue;
+}
+
+.emplacement[data-valeur="5"] {
+  color: brown;
+}
+
+.emplacement[data-valeur="6"] {
+  color: turquoise;
+}
+
+.emplacement[data-valeur="7"] {
+  color: black;
+}
+
+.emplacement[data-valeur="8"] {
+  color: darkgray;
 }

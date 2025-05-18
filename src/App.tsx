@@ -96,9 +96,10 @@ export function App() {
   }, [estZoneDeminee, estZoneDetruite]);
 
   return (
-    <>
-      <div>
+    <div className="main-container">
+      <div className="selection-container">
         <select
+          className="selection"
           name="difficulte"
           value={difficulte}
           onChange={changerDifficulte}
@@ -111,28 +112,28 @@ export function App() {
         </select>
       </div>
 
-      <div>
-        <span>{nombreBaliseDisponible}</span>
-        <button onClick={lancerDeminage}>
+      <div className="conteneur-actions">
+        <span className="action">
+          {nombreBaliseDisponible} <span className="icone-action">🚩</span>
+        </span>
+        <button className="bouton-action" onClick={lancerDeminage}>
           {estZoneDeminee ? "😎" : estZoneDetruite ? "🤯" : "🙂"}
         </button>
-        <span>{tempsEcoule}</span>
+        <span className="action">
+          {tempsEcoule} <span className="icone-action">⏰</span>
+        </span>
       </div>
 
       <div
+        className="conteneur-zone"
         style={{
-          display: "grid",
           gridTemplateColumns: `repeat(${configuration?.largeur ?? 1}, 1fr)`,
         }}
       >
         {listeEmplacement.map((emplacement, i) => (
           <button
-            style={{
-              background:
-                emplacement.valeur === "💣" && emplacement.estDecouvert
-                  ? "red"
-                  : " black",
-            }}
+            className={`emplacement ${emplacement.estDecouvert && emplacement.valeur === "💣" ? "erreur" : ""}`}
+            data-valeur={emplacement.valeur}
             disabled={
               estZoneDeminee || estZoneDetruite || emplacement.estDecouvert
             }
@@ -144,6 +145,6 @@ export function App() {
           </button>
         ))}
       </div>
-    </>
+    </div>
   );
 }
