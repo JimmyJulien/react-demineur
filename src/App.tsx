@@ -1,21 +1,13 @@
-import { useState, type ChangeEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type MouseEvent,
+} from "react";
 import "./App.css";
-
-type ValeurCellule = "💣" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8";
-
-interface Cellule {
-  estBalisee: boolean;
-  estDecouverte: boolean;
-  valeur: ValeurCellule;
-}
-
-type Difficulte = "Débutant" | "Intermédiaire" | "Expert";
-
-interface Grille {
-  hauteur: number;
-  largeur: number;
-  listeCellule: Cellule[];
-}
+import type { Difficulte, Emplacement } from "./app.model";
+import { useZone } from "./useZone";
 
 export function App() {
   const optionsDifficulte: Difficulte[] = [
@@ -26,147 +18,132 @@ export function App() {
 
   const [difficulte, setDifficulte] = useState<Difficulte>("Débutant");
 
-  const [
-    estSelectionDifficulteDesactivee,
-    setEstSelectionDifficulteDesactivee,
-  ] = useState<boolean>(false);
+  const {
+    baliserEmplacement,
+    configuration,
+    decouvrirEmplacement,
+    definirZone,
+    estZoneDeminee,
+    estZoneDetruite,
+    listeEmplacement,
+    nombreBaliseDisponible,
+  } = useZone(difficulte);
 
-  const [estBoutonJouerDesactive, setEstBoutonJouerDesactive] =
-    useState<boolean>(false);
+  const [tempsEcoule, setTempsEcoule] = useState<number>(0);
 
-  const [grille, setGrille] = useState<Grille | null>(null);
+  const refIntervalTempsEcoule = useRef<NodeJS.Timeout | null>(null);
 
-  const [estGrilleAffichee, setEstGrilleAffichee] = useState<boolean>(false);
-
-  function selectionnerDifficulte(event: ChangeEvent<HTMLSelectElement>) {
+  function changerDifficulte(event: ChangeEvent<HTMLSelectElement>) {
     setDifficulte(event.target.value as Difficulte);
   }
 
-  function jouer() {
-    setEstBoutonJouerDesactive(true);
-    setEstSelectionDifficulteDesactivee(true);
+  function lancerDeminage() {
+    definirZone(difficulte);
 
-    const listeBoutonGrille: Cellule[] = [];
-
-    let hauteurGrille: number = 0;
-    let largeurGrille: number = 0;
-
-    if (difficulte === "Débutant") {
-      hauteurGrille = 8;
-      largeurGrille = 8;
+    if (refIntervalTempsEcoule.current) {
+      clearInterval(refIntervalTempsEcoule.current);
     }
 
-    if (difficulte === "Intermédiaire") {
-      hauteurGrille = 16;
-      largeurGrille = 16;
-    }
-
-    if (difficulte === "Expert") {
-      hauteurGrille = 16;
-      largeurGrille = 30;
-    }
-
-    for (let i = 0; i < largeurGrille * hauteurGrille; i++) {
-      listeBoutonGrille.push({
-        estBalisee: false,
-        estDecouverte: false,
-        valeur: "💣",
-      });
-    }
-
-    setGrille({
-      hauteur: hauteurGrille,
-      largeur: largeurGrille,
-      listeCellule: listeBoutonGrille,
-    });
-
-    setEstGrilleAffichee(true);
+    setTempsEcoule(0);
   }
 
-  function decouvrirCellule(indexCellule: number) {
-    if (grille) {
-      const nouvelleListeCellule: Cellule[] = [];
+  function deminer(indexEmplacement: number) {
+    const aucunEmplacementDecouvert = listeEmplacement.every(
+      (emplacement) => !emplacement.estDecouvert,
+    );
 
-      for (let i = 0; i < grille.listeCellule.length; i++) {
-        const cellule = grille.listeCellule[i];
-
-        if (i === indexCellule) {
-          cellule.estDecouverte = true;
-        }
-
-        nouvelleListeCellule.push(cellule);
-      }
-
-      setGrille({
-        ...grille,
-        listeCellule: nouvelleListeCellule,
-      });
+    if (aucunEmplacementDecouvert) {
+      refIntervalTempsEcoule.current = setInterval(() => {
+        setTempsEcoule((tempsEcoule) => tempsEcoule + 1);
+      }, 1000);
     }
+
+    decouvrirEmplacement(indexEmplacement);
   }
 
-  function baliserCellule(indexCellule: number) {
-    if (grille) {
-      const nouvelleListeCellule: Cellule[] = [];
-
-      for (let i = 0; i < grille.listeCellule.length; i++) {
-        const cellule = grille.listeCellule[i];
-
-        if (i === indexCellule) {
-          cellule.estBalisee = true;
-        }
-
-        nouvelleListeCellule.push(cellule);
-      }
-
-      setGrille({
-        ...grille,
-        listeCellule: nouvelleListeCellule,
-      });
-    }
+  function baliser(
+    event: MouseEvent<HTMLButtonElement>,
+    indexEmplacement: number,
+  ) {
+    event.preventDefault();
+    baliserEmplacement(indexEmplacement);
   }
+
+  function definirContenuEmplacement(emplacement: Emplacement) {
+    if (estZoneDetruite && emplacement.valeur === "💣") {
+      return emplacement.valeur;
+    }
+
+    if (emplacement.estDecouvert) {
+      return emplacement.valeur;
+    }
+
+    if (emplacement.estPotentiellementDangereux) {
+      return "❓";
+    }
+
+    if (emplacement.estBalise) {
+      return "🚩";
+    }
+
+    return "";
+  }
+
+  useEffect(() => {
+    if (refIntervalTempsEcoule.current && (estZoneDeminee || estZoneDetruite)) {
+      clearInterval(refIntervalTempsEcoule.current);
+    }
+  }, [estZoneDeminee, estZoneDetruite]);
 
   return (
     <>
-      <select
-        disabled={estSelectionDifficulteDesactivee}
-        name="difficulte"
-        data-testid="select-difficulte"
-        value={difficulte}
-        onChange={selectionnerDifficulte}
-      >
-        {optionsDifficulte.map((difficulte) => (
-          <option key={difficulte} value={difficulte}>
-            {difficulte}
-          </option>
-        ))}
-      </select>
-      <button disabled={estBoutonJouerDesactive} onClick={jouer}>
-        Jouer
-      </button>
-
-      {estGrilleAffichee && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${grille?.largeur ?? 1}, 1fr)`,
-          }}
-          data-testid="grille"
+      <div>
+        <select
+          name="difficulte"
+          value={difficulte}
+          onChange={changerDifficulte}
         >
-          {grille?.listeCellule.map((cellule, i) => (
-            <button
-              key={i}
-              onClick={() => decouvrirCellule(i)}
-              onContextMenu={() => baliserCellule(i)}
-            >
-              {cellule.estBalisee
-                ? "🚩"
-                : cellule.estDecouverte
-                  ? cellule.valeur
-                  : ""}
-            </button>
+          {optionsDifficulte.map((difficulte) => (
+            <option key={difficulte} value={difficulte}>
+              {difficulte}
+            </option>
           ))}
-        </div>
-      )}
+        </select>
+      </div>
+
+      <div>
+        <span>{nombreBaliseDisponible}</span>
+        <button onClick={lancerDeminage}>
+          {estZoneDeminee ? "😎" : estZoneDetruite ? "🤯" : "🙂"}
+        </button>
+        <span>{tempsEcoule}</span>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${configuration?.largeur ?? 1}, 1fr)`,
+        }}
+      >
+        {listeEmplacement.map((emplacement, i) => (
+          <button
+            style={{
+              background:
+                emplacement.valeur === "💣" && emplacement.estDecouvert
+                  ? "red"
+                  : " black",
+            }}
+            disabled={
+              estZoneDeminee || estZoneDetruite || emplacement.estDecouvert
+            }
+            key={i}
+            onClick={() => deminer(i)}
+            onContextMenu={(e) => baliser(e, i)}
+          >
+            {definirContenuEmplacement(emplacement)}
+          </button>
+        ))}
+      </div>
     </>
   );
 }
